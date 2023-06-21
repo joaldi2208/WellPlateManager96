@@ -53,11 +53,11 @@ class MyApp(MDApp):
 
     def build(self):
 
-        self.title = "96-Well Plate"
+        self.title = "WellPlateManager96"
         self.theme_cls.primary_palette = "Blue"
         
         layout = GridLayout(cols=1)
-        toolbar = MDToolbar(title="Button Grid")
+        toolbar = MDToolbar(title="96-Well Plate")
         toolbar.right_action_items = [
                 ["file", lambda x: self.open_file_manager()],
                 ["content-save", lambda x: self.show_save_dialog()],
