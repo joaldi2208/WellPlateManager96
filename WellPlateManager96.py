@@ -12,6 +12,9 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.label import MDLabel
 
+import pandas as pd
+import numpy as np
+
 
 class RoundButtonGrid(GridLayout):
 
