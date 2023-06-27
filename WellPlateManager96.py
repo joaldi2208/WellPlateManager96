@@ -12,8 +12,29 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.label import MDLabel
 
+
 import pandas as pd
 import numpy as np
+import seval
+import re
+
+class ArithmeticOperation():
+    def __init__(self, elementA, elementB):
+        self.elementA = elementA
+        self.elementB = elementB
+
+    def addition(self):
+        return self.elementA + self.elementB
+
+    def subtraction(self):
+        return self.elementA - self.elementB
+
+    def multiplication(self):
+        return self.elementA * self.elementB
+
+    def division(self):
+        return self.elementA / self.elementB
+
 
 
 class RoundButtonGrid(GridLayout):
@@ -37,8 +58,22 @@ class RoundButtonGrid(GridLayout):
         self.colors = [
                 get_color_from_hex("#000000"), # black
                 get_color_from_hex("#FF0000"), # red
+                get_color_from_hex("#8B0000"), # red4
                 get_color_from_hex("#00FF00"), # green
+                get_color_from_hex("#008B00"), # green
                 get_color_from_hex("#0000FF"), # blue
+                get_color_from_hex("#00008B"), # blue4
+                get_color_from_hex("#FFFF00"), # yellow
+                get_color_from_hex("#8B8B00"), # yellow4
+                get_color_from_hex("#A020F0"), # purple
+                get_color_from_hex("#551A8B"), # purple4
+                get_color_from_hex("#FF8C00"), # darkOrange
+                get_color_from_hex("#8B4500"), # darkOrange4
+                get_color_from_hex("#FFC1C1"), # rosyBrown1
+                get_color_from_hex("#CD9B9B"), # rosybrown3
+                get_color_from_hex("#00FFFF"), # cyan
+                get_color_from_hex("#008B8B"), # cyan4
+                get_color_from_hex("#FFFFFF"), # white
         ]
         return self.colors[color_index]
 
@@ -53,6 +88,7 @@ class RoundButtonGrid(GridLayout):
 class MyApp(MDApp):
     button_colors = None
     spreadsheet = None
+    samples_col = None
 
     def build(self):
 
@@ -66,6 +102,7 @@ class MyApp(MDApp):
                 ["content-save", lambda x: self.show_save_dialog()],
                 ["information", lambda x: self.show_explanation_dialog()],
                 ["group", lambda x: self.group_samples()],
+                ["calculator", lambda x: self.show_arithmetic_dialog()],
         ]
         layout.add_widget(toolbar)
         
@@ -102,19 +139,134 @@ class MyApp(MDApp):
 
         
         elif path.endswith(".xlsx"):
-            spreadsheet = pd.read_excel(path)
-            self.spreadsheet = np.asarray(spreadsheet, order="K") # C, F, A
+            self.spreadsheet = pd.read_excel(path, index_col=0)
+            n_cols = self.spreadsheet.shape[1]
+            self.spreadsheet.columns = [i+1 for i in range(n_cols)]
+
+            self.file_manager.close()
+            empty_cols = self.spreadsheet.columns[self.spreadsheet.isna().all()]
+            # white color for empty samples
+            for empty_col in empty_cols:
+                col_index = empty_col - 1
+                self.button_colors[col_index] = 17
+            self.button_colors[n_cols:] = [17 for _ in range(96-n_cols)]
+            
+            self.spreadsheet.dropna()
+            self.root.clear_widgets()
+            self.root.add_widget(self.build())
+
 
         else:
             print("not a supported file format")
 
 
     def group_samples(self):
-        print(self.button_colors)
+        #print(self.button_colors)
         if self.spreadsheet is None:
             print("No data loaded")
         else:
+            self.grouped_samples = []
+            colors = np.array(self.button_colors)
+
+            self.grouped_samples.append( np.where(colors == 0)[0] )
+            self.grouped_samples.append( np.where(colors == 1)[0] )
+            self.grouped_samples.append( np.where(colors == 2)[0] )
+            self.grouped_samples.append( np.where(colors == 3)[0] )
+            self.grouped_samples.append( np.where(colors == 4)[0] )
+            self.grouped_samples.append( np.where(colors == 5)[0] )
+            self.grouped_samples.append( np.where(colors == 6)[0] )
+            self.grouped_samples.append( np.where(colors == 7)[0] )
+            self.grouped_samples.append( np.where(colors == 8)[0] )
+            self.grouped_samples.append( np.where(colors == 9)[0] )
+            self.grouped_samples.append( np.where(colors == 10)[0] )
+            self.grouped_samples.append( np.where(colors == 11)[0] )
+            self.grouped_samples.append( np.where(colors == 12)[0] )
+            self.grouped_samples.append( np.where(colors == 13)[0] )
+            self.grouped_samples.append( np.where(colors == 14)[0] )
+            self.grouped_samples.append( np.where(colors == 15)[0] )
+            self.grouped_samples.append( np.where(colors == 16)[0] )
+            self.grouped_samples.append( np.where(colors == 17)[0] )
+            
             print(self.spreadsheet)
+
+
+    def show_arithmetic_dialog(self):
+        content = MDTextField()
+        self.dialog = MDDialog(
+                title="arithmetic",
+                type="custom",
+                content_cls=content,
+                buttons=[
+                    MDFlatButton(text="CANCEL", on_release=self.dismiss_save_dialog),
+                    MDFlatButton(text="CALCULATE", on_release=lambda x: self.basic_arithmetic(content.text))
+                ],
+        )
+        self.dialog.open()
+
+    def basic_arithmetic(self, arithmetic_operation):
+        """
+        until now only two different element can make one arithmetic operation
+        """
+        print(arithmetic_operation)
+
+        color_table = {
+                "black": 0,
+                "lightred": 1,
+                "darkred": 2,
+                "lightgreen": 3,
+                "darkgreen": 4,
+                "lightblue": 5,
+                "darkblue": 6,
+                "lightyellow": 7,
+                "darkyellow": 8,
+                "lightpurple": 9,
+                "darkpurple": 10,
+                "lightorange": 11,
+                "darkorange": 12,
+                "lightbrown": 13,
+                "darkbrown": 14,
+                "lightcyan": 15,
+                "darkcyan": 16,
+                }
+        
+        allowed_operators = r"[\+\-\*\/]+"
+        groups = re.split(allowed_operators, arithmetic_operation)
+        used_operators = re.findall(allowed_operators, arithmetic_operation)
+        codes = [color_table[color] for color in groups]
+    
+        print(groups)
+        print(codes)
+        print(used_operators)
+        
+        color_locations = []
+        for code in codes:
+            locations = self.grouped_samples[code]
+            # index vs real location
+            locations = [location + 1 for location in locations]
+            color_locations.append(locations)
+        
+       #----------------------------mean of groupint---------------# 
+
+        grouped_mean = []
+        for locations in color_locations:
+           column_mean = self.spreadsheet[locations].mean(axis=1)
+           grouped_mean.append(column_mean)
+
+
+        Calculation = ArithmeticOperation(grouped_mean[0], grouped_mean[1])
+
+        if used_operators[0] == "+":
+            Sum = Calculation.addition()
+            print(Sum)
+        elif used_operators[0] == "-":
+            Diff = Calculation.subtraction()
+            print(Diff)
+        elif used_operators[0] == "*":
+            Prod = Calculation.multiplication()
+            print(Prod)
+        elif used_operators[0] == "/":
+            Quot = Calculation.division()
+            print(Quot)
 
     def show_save_dialog(self):
         content = MDTextField()
