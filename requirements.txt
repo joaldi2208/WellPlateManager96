@@ -1,4 +1,6 @@
 Kivy==2.1.0
 kivymd==0.104.2
+matplotlib==3.5.1
 numpy==1.22.3
 pandas==1.5.2
+scipy==1.11.0

@@ -59,30 +59,30 @@ class RoundButtonGrid(GridLayout):
     def get_color_from_index(self, color_index):
         self.colors = [
                 get_color_from_hex("#000000"), # black
+                get_color_from_hex("#ADD8E6"), # light blue
+                get_color_from_hex("#0000FF"), # blue
+                get_color_from_hex("#00008B"), # dark blue
+                get_color_from_hex("#90EE90"), # light green
+                get_color_from_hex("#008000"), # green
+                get_color_from_hex("#006400"), # dark green
+                get_color_from_hex("#FFB6C1"), # light red
                 get_color_from_hex("#FF0000"), # red
-                get_color_from_hex("#8B0000"), # red4
-                get_color_from_hex("#00FF00"), # green
-                get_color_from_hex("#008B00"), # green
-                get_color_from_hex("#00008B"), # blue4
+                get_color_from_hex("#8B0000"), # dark red
+                get_color_from_hex("#FFDAB9"), # light orange
+                get_color_from_hex("#FFA500"), # orange
+                get_color_from_hex("#FF8C00"), # dark orange
+                get_color_from_hex("#FFFFE0"), # light yellow
                 get_color_from_hex("#FFFF00"), # yellow
-                get_color_from_hex("#8B8B00"), # yellow4
-                get_color_from_hex("#A020F0"), # purple
-                get_color_from_hex("#551A8B"), # purple4
-                get_color_from_hex("#FF8C00"), # darkOrange
-                get_color_from_hex("#8B4500"), # darkOrange4
-                get_color_from_hex("#FFC1C1"), # rosyBrown1
-                get_color_from_hex("#CD9B9B"), # rosybrown3
-                get_color_from_hex("#00FFFF"), # cyan
-                get_color_from_hex("#008B8B"), # cyan4
-                get_color_from_hex("#800000"), # maroon
-                get_color_from_hex("#FFD700"), # gold
-                get_color_from_hex("#00FF7F"), # sprintGreen
-                get_color_from_hex("#D2691E"), # chocolate
-                get_color_from_hex("#8A2BE2"), # blueViolet
-                get_color_from_hex("#4B0082"), # indigo
-                get_color_from_hex("#FF1493"), # deepPink
-                get_color_from_hex("#7FFF00"), # chartreuse
-                get_color_from_hex("#FF69B4"), # hotPink
+                get_color_from_hex("#808000"), # dark yellow
+                get_color_from_hex("#E6E6FA"), # light purple
+                get_color_from_hex("#800080"), # purple
+                get_color_from_hex("#4B0082"), # dark purple
+                get_color_from_hex("#FFB6C1"), # light pink
+                get_color_from_hex("#FFC0CB"), # pink
+                get_color_from_hex("#FF1493"), # dark pink
+                get_color_from_hex("#D3D3D3"), # light grey
+                get_color_from_hex("#808080"), # grey
+                get_color_from_hex("#A9A9A9"), # dark grey
                 get_color_from_hex("#FFFFFF"), # white
         ]
         return self.colors[color_index]
@@ -113,6 +113,8 @@ class MyApp(MDApp):
                 ["information", lambda x: self.show_explanation_dialog()],
                 ["group", lambda x: self.group_samples()],
                 ["calculator", lambda x: self.show_arithmetic_dialog()],
+                ["chart-scatter-plot", lambda x: self.plot()],
+                
         ]
         layout.add_widget(toolbar)
         
@@ -231,30 +233,30 @@ class MyApp(MDApp):
 
         color_table = {
                 "black": 0,
-                "lightred": 1,
-                "darkred": 2,
-                "lightgreen": 3,
-                "darkgreen": 4,
-                "darkblue": 5,
-                "lightyellow": 6,
-                "darkyellow": 7,
-                "lightpurple": 8,
-                "darkpurple": 9,
+                "lightblue": 1,
+                "blue": 2,
+                "darkblue": 3,
+                "lightgreen": 4,
+                "green": 5,
+                "darkgreen": 6,
+                "lightred": 7,
+                "red": 8,
+                "darkred": 9,
                 "lightorange": 10,
-                "darkorange": 11,
-                "lightbrown": 12,
-                "darkbrown": 13,
-                "lightcyan": 14,
-                "darkcyan": 15,
-                "maroon": 16,
-                "gold": 17,
-                "sprintGreen": 18,
-                "chocolate": 19,
-                "blueViolet": 20,
-                "indigo": 21,
-                "deepPink": 22,
-                "chartreuse": 23,
-                "hotPink": 24,
+                "orange": 11,
+                "darkorange": 12,
+                "lightyellow": 13,
+                "yellow": 14,
+                "darkyellow": 15,
+                "lightpurple": 16,
+                "purple": 17,
+                "darkpurple": 18,
+                "lightpink": 19,
+                "pink": 20,
+                "darkpink": 21,
+                "lightgrey": 22,
+                "grey": 23,
+                "darkgrey": 24,
                 }
         
         allowed_operators = r"[\+\-\*\/]+"
@@ -289,18 +291,7 @@ class MyApp(MDApp):
         elif used_operators[0] == "-":
             Diff = Calculation.subtraction()
             print(Diff)
-            params, _ = curve_fit(logistic_growth, self.spreadsheet.index.to_list(), Diff.to_list())
-            N0_fit, r_fit, K_fit = params
-            t_fit = np.linspace(0,172800, 10000)
-
-            N_fit = logistic_growth(t_fit, N0_fit, r_fit, K_fit)
-            plt.scatter(self.spreadsheet.index, Diff, color="black", label="Data")
-            plt.plot(t_fit, N_fit, label="Fit")
-            plt.xlabel("Time")
-            plt.ylabel("Population Size")
-            plt.legend()
-
-            plt.show()
+            plt.scatter(self.spreadsheet.index, Diff, s=0.1)
         elif used_operators[0] == "*":
             Prod = Calculation.multiplication()
             print(Prod)
@@ -321,6 +312,10 @@ class MyApp(MDApp):
                 ],
         )
         self.dialog.open()
+
+
+    def plot(self):
+        plt.show()
 
 
     def dismiss_save_dialog(self, *args):
