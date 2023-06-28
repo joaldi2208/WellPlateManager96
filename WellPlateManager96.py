@@ -15,7 +15,9 @@ from kivymd.uix.label import MDLabel
 
 import pandas as pd
 import numpy as np
-import seval
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+#import seval
 import re
 
 class ArithmeticOperation():
@@ -61,7 +63,6 @@ class RoundButtonGrid(GridLayout):
                 get_color_from_hex("#8B0000"), # red4
                 get_color_from_hex("#00FF00"), # green
                 get_color_from_hex("#008B00"), # green
-                get_color_from_hex("#0000FF"), # blue
                 get_color_from_hex("#00008B"), # blue4
                 get_color_from_hex("#FFFF00"), # yellow
                 get_color_from_hex("#8B8B00"), # yellow4
@@ -73,6 +74,15 @@ class RoundButtonGrid(GridLayout):
                 get_color_from_hex("#CD9B9B"), # rosybrown3
                 get_color_from_hex("#00FFFF"), # cyan
                 get_color_from_hex("#008B8B"), # cyan4
+                get_color_from_hex("#800000"), # maroon
+                get_color_from_hex("#FFD700"), # gold
+                get_color_from_hex("#00FF7F"), # sprintGreen
+                get_color_from_hex("#D2691E"), # chocolate
+                get_color_from_hex("#8A2BE2"), # blueViolet
+                get_color_from_hex("#4B0082"), # indigo
+                get_color_from_hex("#FF1493"), # deepPink
+                get_color_from_hex("#7FFF00"), # chartreuse
+                get_color_from_hex("#FF69B4"), # hotPink
                 get_color_from_hex("#FFFFFF"), # white
         ]
         return self.colors[color_index]
@@ -148,8 +158,8 @@ class MyApp(MDApp):
             # white color for empty samples
             for empty_col in empty_cols:
                 col_index = empty_col - 1
-                self.button_colors[col_index] = 17
-            self.button_colors[n_cols:] = [17 for _ in range(96-n_cols)]
+                self.button_colors[col_index] = 25
+            self.button_colors[n_cols:] = [25 for _ in range(96-n_cols)]
             
             self.spreadsheet.dropna()
             self.root.clear_widgets()
@@ -185,7 +195,14 @@ class MyApp(MDApp):
             self.grouped_samples.append( np.where(colors == 14)[0] )
             self.grouped_samples.append( np.where(colors == 15)[0] )
             self.grouped_samples.append( np.where(colors == 16)[0] )
-            self.grouped_samples.append( np.where(colors == 17)[0] )
+            self.grouped_samples.append( np.where(colors == 18)[0] )
+            self.grouped_samples.append( np.where(colors == 19)[0] )
+            self.grouped_samples.append( np.where(colors == 20)[0] )
+            self.grouped_samples.append( np.where(colors == 21)[0] )
+            self.grouped_samples.append( np.where(colors == 22)[0] )
+            self.grouped_samples.append( np.where(colors == 23)[0] )
+            self.grouped_samples.append( np.where(colors == 24)[0] )
+            self.grouped_samples.append( np.where(colors == 25)[0] )
             
             print(self.spreadsheet)
 
@@ -207,6 +224,9 @@ class MyApp(MDApp):
         """
         until now only two different element can make one arithmetic operation
         """
+        def logistic_growth(t, N0, r, K):
+            return K / (1 + (K / N0 - 1) * np.exp(-r * t))
+
         print(arithmetic_operation)
 
         color_table = {
@@ -215,18 +235,26 @@ class MyApp(MDApp):
                 "darkred": 2,
                 "lightgreen": 3,
                 "darkgreen": 4,
-                "lightblue": 5,
-                "darkblue": 6,
-                "lightyellow": 7,
-                "darkyellow": 8,
-                "lightpurple": 9,
-                "darkpurple": 10,
-                "lightorange": 11,
-                "darkorange": 12,
-                "lightbrown": 13,
-                "darkbrown": 14,
-                "lightcyan": 15,
-                "darkcyan": 16,
+                "darkblue": 5,
+                "lightyellow": 6,
+                "darkyellow": 7,
+                "lightpurple": 8,
+                "darkpurple": 9,
+                "lightorange": 10,
+                "darkorange": 11,
+                "lightbrown": 12,
+                "darkbrown": 13,
+                "lightcyan": 14,
+                "darkcyan": 15,
+                "maroon": 16,
+                "gold": 17,
+                "sprintGreen": 18,
+                "chocolate": 19,
+                "blueViolet": 20,
+                "indigo": 21,
+                "deepPink": 22,
+                "chartreuse": 23,
+                "hotPink": 24,
                 }
         
         allowed_operators = r"[\+\-\*\/]+"
@@ -261,12 +289,25 @@ class MyApp(MDApp):
         elif used_operators[0] == "-":
             Diff = Calculation.subtraction()
             print(Diff)
+            params, _ = curve_fit(logistic_growth, self.spreadsheet.index.to_list(), Diff.to_list())
+            N0_fit, r_fit, K_fit = params
+            t_fit = np.linspace(0,172800, 10000)
+
+            N_fit = logistic_growth(t_fit, N0_fit, r_fit, K_fit)
+            plt.scatter(self.spreadsheet.index, Diff, color="black", label="Data")
+            plt.plot(t_fit, N_fit, label="Fit")
+            plt.xlabel("Time")
+            plt.ylabel("Population Size")
+            plt.legend()
+
+            plt.show()
         elif used_operators[0] == "*":
             Prod = Calculation.multiplication()
             print(Prod)
         elif used_operators[0] == "/":
             Quot = Calculation.division()
             print(Quot)
+
 
     def show_save_dialog(self):
         content = MDTextField()
